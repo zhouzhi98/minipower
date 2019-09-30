@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from django.contrib.admin.models import LogEntry
 
 from .models import Post, Category, Tag
 from .adminforms import PostAdminForm
 from typeidea.custom_site import custom_site
+from typeidea.base_admin import BaseOwnerAdmin
 
 
 # Register your models here.
@@ -15,24 +17,16 @@ class PostInline(admin.StackedInline):
 
 
 @admin.register(Category, site=custom_site)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(BaseOwnerAdmin):
     list_display = ('name', 'status', 'is_nav', 'created_time')
     fields = ('name', 'status', 'is_nav')
     inlines = [PostInline, ]
 
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
-
 
 @admin.register(Tag, site=custom_site)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(BaseOwnerAdmin):
     list_display = ('name', 'status', 'created_time')
     fields = ('name', 'status')
-
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
 
 
 class CategoryOwnerFilter(admin.SimpleListFilter):
@@ -50,7 +44,7 @@ class CategoryOwnerFilter(admin.SimpleListFilter):
 
 
 @admin.register(Post, site=custom_site)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(BaseOwnerAdmin):
     list_display = ['title', 'category', 'status', 'created_time', 'owner', 'operator', ]
     list_display_links = []
     list_filter = [CategoryOwnerFilter]
@@ -80,15 +74,12 @@ class PostAdmin(admin.ModelAdmin):
 
     operator.short_description = '操作'
 
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.filter(owner=request.user)
-
-    """class Media:
+    class Media:
         css = {'all': ("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css",),
                }
-        js = ("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js",)"""
+        js = ("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js",)
+
+
+@admin.register(LogEntry, site=custom_site)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ['object_repr', 'object_id', 'action_flag', 'user', 'change_message']

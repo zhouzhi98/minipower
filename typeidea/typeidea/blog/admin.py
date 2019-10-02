@@ -64,9 +64,8 @@ class PostAdmin(BaseOwnerAdmin):
             'fields': ('desc', 'content',),
         }),
         ('额外信息', {
-            'classes': ('collapse',),
             'fields': ('tag',),
-        })
+        }),
     )
 
     def operator(self, obj):

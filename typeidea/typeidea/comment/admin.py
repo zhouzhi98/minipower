@@ -7,7 +7,7 @@ from typeidea.base_admin import BaseOwnerAdmin
 
 # Register your models here.
 @admin.register(Comment, site=custom_site)
-class CommentAdmin(BaseOwnerAdmin):
+class CommentAdmin(admin.ModelAdmin):
     list_display = ('target', 'nickname', 'content', 'website', 'created_time')
     fields = ('target', 'content')
 
